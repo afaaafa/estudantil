@@ -1,0 +1,57 @@
+@startuml
+title Sistema de Moeda Estudantil - Diagrama de Casos de Uso
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Aluno" as aluno
+actor "Professor" as professor
+actor "Empresa Parceira" as empresa
+actor "Serviço de E-mail" as email
+
+rectangle "Sistema de Moeda Estudantil" {
+  usecase "Autenticar-se" as UCAuth
+  usecase "Cadastrar aluno" as UCCadAluno
+  usecase "Cadastrar empresa\nparceira" as UCCadEmpresa
+  usecase "Consultar extrato" as UCExtrato
+  usecase "Consultar vantagens" as UCConsultarVant
+  usecase "Enviar moedas\nao aluno" as UCEnviarMoedas
+  usecase "Notificar recebimento\nde moedas" as UCNotifMoedas
+  usecase "Cadastrar vantagem" as UCCadVantagem
+  usecase "Resgatar vantagem" as UCResgatar
+  usecase "Enviar cupom de resgate" as UCCupom
+}
+
+aluno -- UCCadAluno
+aluno -- UCExtrato
+aluno -- UCConsultarVant
+aluno -- UCResgatar
+
+professor -- UCExtrato
+professor -- UCEnviarMoedas
+
+empresa -- UCCadEmpresa
+empresa -- UCCadVantagem
+
+UCExtrato .> UCAuth : <<include>>
+UCConsultarVant .> UCAuth : <<include>>
+UCEnviarMoedas .> UCAuth : <<include>>
+UCCadVantagem .> UCAuth : <<include>>
+UCResgatar .> UCAuth : <<include>>
+
+UCEnviarMoedas .> UCNotifMoedas : <<include>>
+UCResgatar .> UCCupom : <<include>>
+
+email -- UCNotifMoedas
+email -- UCCupom
+
+note bottom of UCEnviarMoedas
+Professor deve possuir saldo suficiente
+e informar uma mensagem de reconhecimento.
+end note
+
+note bottom of UCResgatar
+O resgate debita o saldo do aluno
+e gera um codigo de conferência.
+end note
+@enduml

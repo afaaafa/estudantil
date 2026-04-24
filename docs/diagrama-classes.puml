@@ -1,0 +1,124 @@
+@startuml
+title Sistema de Moeda Estudantil - Diagrama de Classes
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class UsuarioSistema {
+  +id: UUID
+  +nome: String
+  +login: String
+  +senhaHash: String
+  +ativo: Boolean
+  +autenticar(senha: String): Boolean
+}
+
+class Aluno {
+  +email: String
+  +cpf: String
+  +rg: String
+  +endereco: String
+  +curso: String
+  +cadastrar(): void
+  +resgatarVantagem(vantagem: Vantagem): ResgateVantagem
+}
+
+class Professor {
+  +cpf: String
+  +departamento: String
+  +distribuirMoedas(aluno: Aluno, quantidade: int, mensagem: String): DistribuicaoMoedas
+}
+
+class EmpresaParceira {
+  +emailContato: String
+  +cadastrar(): void
+  +cadastrarVantagem(): Vantagem
+}
+
+class InstituicaoEnsino {
+  +id: UUID
+  +nome: String
+}
+
+class CarteiraMoedas {
+  +id: UUID
+  +saldoAtual: int
+  +creditar(quantidade: int): void
+  +debitar(quantidade: int): void
+  +consultarExtrato(): List<TransacaoMoedas>
+}
+
+abstract class TransacaoMoedas {
+  +id: UUID
+  +dataHora: DateTime
+  +quantidade: int
+  +saldoPosterior: int
+}
+
+class DistribuicaoMoedas {
+  +mensagemReconhecimento: String
+}
+
+class ResgateVantagem {
+  +codigoResgate: String
+  +status: StatusResgate
+}
+
+class CreditoSemestralProfessor {
+  +id: UUID
+  +semestreReferencia: String
+  +quantidade: int = 1000
+}
+
+class Vantagem {
+  +id: UUID
+  +titulo: String
+  +descricao: String
+  +fotoUrl: String
+  +custoMoedas: int
+  +ativa: Boolean
+}
+
+enum StatusResgate {
+  SOLICITADO
+  UTILIZADO
+  CANCELADO
+}
+
+UsuarioSistema <|-- Aluno
+UsuarioSistema <|-- Professor
+UsuarioSistema <|-- EmpresaParceira
+
+InstituicaoEnsino "1" o-- "*" Aluno
+InstituicaoEnsino "1" o-- "*" Professor
+
+UsuarioSistema "1" *-- "1" CarteiraMoedas : possui >
+CarteiraMoedas "1" *-- "*" TransacaoMoedas : registra >
+
+TransacaoMoedas <|-- DistribuicaoMoedas
+TransacaoMoedas <|-- ResgateVantagem
+
+Professor "1" --> "*" DistribuicaoMoedas : autoriza >
+Aluno "1" --> "*" DistribuicaoMoedas : recebe >
+Aluno "1" --> "*" ResgateVantagem : solicita >
+EmpresaParceira "1" --> "*" Vantagem : oferece >
+ResgateVantagem "*" --> "1" Vantagem : referencia >
+
+Professor "1" --> "*" CreditoSemestralProfessor : recebe >
+CreditoSemestralProfessor "*" --> "1" CarteiraMoedas : credita >
+
+note right of Professor
+Professores sao pre-cadastrados
+e sempre vinculados a uma instituicao.
+end note
+
+note bottom of CreditoSemestralProfessor
+A cada semestre, 1000 moedas sao adicionadas
+ao saldo corrente do professor.
+end note
+
+note bottom of ResgateVantagem
+O resgate gera um codigo enviado por email
+ao aluno e a empresa parceira.
+end note
+@enduml

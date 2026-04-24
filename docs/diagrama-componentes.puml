@@ -1,0 +1,90 @@
+@startuml
+title Sistema de Moeda Estudantil - Diagrama de Componentes
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Aluno" as aluno
+actor "Professor" as professor
+actor "Empresa Parceira" as empresa
+
+rectangle "Camada View" {
+  [Interface Web MVC] as view
+}
+
+rectangle "Camada Controller" {
+  [AuthController] as authController
+  [AlunoController] as alunoController
+  [ProfessorController] as professorController
+  [EmpresaParceiraController] as empresaController
+  [VantagemController] as vantagemController
+  [ExtratoController] as extratoController
+  [ResgateController] as resgateController
+}
+
+rectangle "Camada Service" {
+  [AutenticacaoService] as authService
+  [CadastroAlunoService] as cadastroAlunoService
+  [CadastroParceiroService] as cadastroParceiroService
+  [DistribuicaoMoedasService] as distribuicaoService
+  [CatalogoVantagensService] as catalogoService
+  [ExtratoService] as extratoService
+  [ResgateVantagemService] as resgateService
+  [NotificacaoEmailService] as notificacaoService
+  [CargaSemestralProfessorService] as cargaSemestralService
+}
+
+rectangle "Camada de Persistencia" {
+  [Repositories / DAO] as repository
+  database "Banco de Dados Relacional" as db
+}
+
+cloud "Servico de E-mail" as emailGateway
+component "Importador de Instituicoes\n e Professores" as importador
+
+aluno --> view
+professor --> view
+empresa --> view
+
+view --> authController
+view --> alunoController
+view --> professorController
+view --> empresaController
+view --> vantagemController
+view --> extratoController
+view --> resgateController
+
+authController --> authService
+alunoController --> cadastroAlunoService
+professorController --> distribuicaoService
+empresaController --> cadastroParceiroService
+vantagemController --> catalogoService
+extratoController --> extratoService
+resgateController --> resgateService
+
+authService --> repository
+cadastroAlunoService --> repository
+cadastroParceiroService --> repository
+distribuicaoService --> repository
+catalogoService --> repository
+extratoService --> repository
+resgateService --> repository
+cargaSemestralService --> repository
+importador --> repository
+
+repository --> db
+
+distribuicaoService --> notificacaoService
+resgateService --> notificacaoService
+notificacaoService --> emailGateway
+
+note bottom of view
+Entrada unica para alunos, professores
+e empresas parceiras.
+end note
+
+note bottom of importador
+Instituicoes e professores sao
+pre-cadastrados pela parceria.
+end note
+@enduml
